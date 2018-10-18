@@ -29,11 +29,9 @@ from class_logger import objLogger as Logger
 from class_config import objConfig as Config
 
 
-def replaceOne(field_string, strout, strin):
-    field_string = str(field_string)
-    new_field=field_string.replace(strout, strin)
-    # new_field=field.replace(new_field, "'", " ")
-    return new_field
+def replaceOne(column, strout, strin):
+    column = column.replace(strout, strin)
+    return column
 
 def replaceAll(text, dic):
     for i, j in dic.iteritems():
@@ -53,46 +51,46 @@ def sendData(row, url):
 def main():
     info = config.sections['GENERAL']
     filename = basepath + '/' + info['file']
-    api_endpoint = info['url_api']
+    api_endpoint = info['url_api_test']
 
     nrows = int(info['nrows'])
     read_rows = int(info['readrows'])
     nr_repeat = nrows/read_rows
     last_repeat = nrows % read_rows
-
+    start = int(info['start'])
+    
     hasErrors = False
 
     for qry_idx in range(nr_repeat + 1):
-        start = (int(read_rows) * qry_idx) + 1
+        skip_rows = (int(read_rows) * qry_idx) + 1
         if qry_idx > nr_repeat:
             read_rows = last_repeat
 
         df = pd.read_csv( filename, delimiter=";", dtype = {"isbn" : "str"}, 
-                            quotechar = '"',encoding = "utf-8", skiprows=range(start, read_rows), nrows=read_rows)
+                            quotechar = '"',encoding = "utf-8", skiprows=range(start, skip_rows), nrows=read_rows)
 
         books = df[['title', 'price','isbn', 'authors', 'publisher', 'link', 'advertiser',
                     'cover', 'genres', 'category', 'language', 'description']]
 
+        dict_genres = {'(Vuoto)' : '', 'sport' : 'sports'}
+        books['genres'] = replaceAll(books['genres'], dict_genres)
+
+
         nbooks = books.to_json(orient='records')
         nbooks = json.loads(nbooks)
+        
 
         detlist = len(books.index)
 
         for i in range(detlist):
-            
-            # loc_detail = nbooks.iloc[i]
+            loc_detail = nbooks.iloc[i]
             detail = nbooks[i]
             detail['price'] = float(str(detail['price']).replace(",", "."))
-
+            
             res = sendData(detail, api_endpoint)
             if res != 200:
-            #     logger.doLog('Terminato inserimento book con isbn ' + str(detail['isbn'])) 
-            # else:
                 hasErrors = True
-                logger.doLog('ERRORE inserimento del libro con isbn ' + str(detail['isbn']) + ' in query nr ' + str(qry_idx))
-
-        if qry_idx = 4:
-            break
+                logger.doLog('Codice' + str(res) + '. ERRORE inserimento del libro con isbn ' + str(detail['isbn']) + ' in query nr ' + str(qry_idx))
             
     if hasErrors:
         sys.exit(1)                    
