@@ -4,15 +4,14 @@
 import sys, os, inspect
 sys.path.append('../../python/python_common_libs')
 import pandas as pd
-import tarfile, zipfile, gzip
 from utils import *
 import requests
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 import json
 from time import sleep
 # import reload
 from datetime import datetime as dtime
+import datetime 
+import shutil 
 
 
 # realpath() will make your script run, even if you symlink it :)
@@ -44,54 +43,61 @@ def sendData(row, url):
     row = json.dumps(row)
     # logger.doLog(str(row))
     result = ''
-    result = requests.post(str(url), data=row, headers=headers)
+    result = requests.post(url, data=row, headers=headers)
     # sleep(0.01)  
-    return result.status_code
+    return result
 
 def main():
     info = config.sections['GENERAL']
     filename = basepath + '/' + info['file']
     api_endpoint = info['url_api_test']
-
-    nrows = int(info['nrows'])
+    # nrows = int(info['nrows'])
     read_rows = int(info['readrows'])
-    nr_repeat = nrows/read_rows
-    last_repeat = nrows % read_rows
     start = int(info['start'])
-    
+    date = dtime.date(dtime.today())
+    time = datetime.date.today().timetuple()
     hasErrors = False
 
-    for qry_idx in range(nr_repeat + 1):
-        skip_rows = (int(read_rows) * qry_idx) + 1
-        if qry_idx > nr_repeat:
-            read_rows = last_repeat
+    column_indexes = [0, 1, 2, 4, 5, 7, 8, 9, 10, 12, 13, 14]
+    
+    column_names = ['link', 'title','cover', 'publisher', 'description', 'authors', 'isbn',
+                    'price', 'language', 'advertiser', 'genres', 'category']
 
-        df = pd.read_csv( filename, delimiter=";", dtype = {"isbn" : "str"}, 
-                            quotechar = '"',encoding = "utf-8", skiprows=range(start, skip_rows), nrows=read_rows)
+    df = pd.read_csv( filename, delimiter=";",  usecols=column_indexes,names=column_names, skiprows=start,
+                     dtype = {"isbn" : "str"}, quotechar = '"',encoding = "utf-8", chunksize=read_rows)
 
-        books = df[['title', 'price','isbn', 'authors', 'publisher', 'link', 'advertiser',
-                    'cover', 'genres', 'category', 'language', 'description']]
+    pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
+
+    for chunk in df:
 
         dict_genres = {'(Vuoto)' : '', 'sport' : 'sports'}
-        books['genres'] = replaceAll(books['genres'], dict_genres)
+        chunk['genres'] = replaceAll(chunk['genres'], dict_genres)
 
+        chunk['category'] = replaceOne(chunk['category'], '(Vuoto)', '')
 
-        nbooks = books.to_json(orient='records')
+        nbooks = chunk.to_json(orient='records')
         nbooks = json.loads(nbooks)
         
 
-        detlist = len(books.index)
-
+        detlist = len(chunk.index)
         for i in range(detlist):
-            loc_detail = nbooks.iloc[i]
+            
+            row_nr = (i + 1 + start)
             detail = nbooks[i]
             detail['price'] = float(str(detail['price']).replace(",", "."))
             
             res = sendData(detail, api_endpoint)
-            if res != 200:
+            code = res.status_code
+            response = res.text 
+            if code != 200:
                 hasErrors = True
-                logger.doLog('Codice' + str(res) + '. ERRORE inserimento del libro con isbn ' + str(detail['isbn']) + ' in query nr ' + str(qry_idx))
-            
+                # logger.doLog('Codice' + str(res) + '. ERRORE inserimento del libro con isbn ' + str(detail['isbn']) + ' in query nr ' + str(qry_idx))
+                logger.doLog( 'riga numero: ' + str(row_nr) + ' ' + response)
+                chunk.iloc[[i]].to_csv('errors.csv', mode='a',quotechar='"', encoding='utf-8', index=False, header=False)
+    
+    # os.rename("errors.csv", str(dtime.now()) + "_errors.csv")
+    shutil.copy(basepath + '/errors.csv', basepath + '/history_errors/' + str(date) + '_' + str(time.tm_hour) + str(time.tm_min) + "_errors.csv")
+    os.remove(basepath + '/errors.csv')
     if hasErrors:
         sys.exit(1)                    
     else:
