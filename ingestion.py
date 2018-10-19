@@ -54,8 +54,9 @@ def main():
     # nrows = int(info['nrows'])
     read_rows = int(info['readrows'])
     start = int(info['start'])
+    stop = int(info['stop'])
     date = dtime.date(dtime.today())
-    time = datetime.date.today().timetuple()
+    time = dtime.now()
     hasErrors = False
 
     column_indexes = [0, 1, 2, 4, 5, 7, 8, 9, 10, 12, 13, 14]
@@ -63,7 +64,7 @@ def main():
     column_names = ['link', 'title','cover', 'publisher', 'description', 'authors', 'isbn',
                     'price', 'language', 'advertiser', 'genres', 'category']
 
-    df = pd.read_csv( filename, delimiter=";",  usecols=column_indexes,names=column_names, skiprows=start,
+    df = pd.read_csv( filename, delimiter=";",  usecols=column_indexes,names=column_names, skiprows=start, nrows=stop,
                      dtype = {"isbn" : "str"}, quotechar = '"',encoding = "utf-8", chunksize=read_rows)
 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
@@ -74,6 +75,7 @@ def main():
         chunk['genres'] = replaceAll(chunk['genres'], dict_genres)
 
         chunk['category'] = replaceOne(chunk['category'], '(Vuoto)', '')
+        chunk['price'] = replaceOne(chunk['price'], ',', '.')
 
         nbooks = chunk.to_json(orient='records')
         nbooks = json.loads(nbooks)
@@ -84,7 +86,7 @@ def main():
             
             row_nr = (i + 1 + start)
             detail = nbooks[i]
-            detail['price'] = float(str(detail['price']).replace(",", "."))
+            # detail['price'] = float(str(detail['price']).replace(",", "."))
             
             res = sendData(detail, api_endpoint)
             code = res.status_code
@@ -96,7 +98,7 @@ def main():
                 chunk.iloc[[i]].to_csv('errors.csv', mode='a',quotechar='"', encoding='utf-8', index=False, header=False)
     
     # os.rename("errors.csv", str(dtime.now()) + "_errors.csv")
-    shutil.copy(basepath + '/errors.csv', basepath + '/history_errors/' + str(date) + '_' + str(time.tm_hour) + str(time.tm_min) + "_errors.csv")
+    shutil.copy(basepath + '/errors.csv', basepath + '/history_errors/' + str(date) + '_' + str(time.hour) + str(time.minute) + "_errors.csv")
     os.remove(basepath + '/errors.csv')
     if hasErrors:
         sys.exit(1)                    
