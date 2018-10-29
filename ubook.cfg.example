@@ -4,7 +4,11 @@ url_api_test = xxx
 file = xxx
 chunkrows = 
 start = 1
-rows_to_read = 5  #Don't set value if you want to read all file
+# Don't set value of parameter above if you want to read all file
+rows_to_read = 1 
+# Specify delimiter to use into double quote
+delimiter = ";"
+encoding = "utf-8"
 
 #key column correspond to position of the column into the file
 [COLUMNS]
