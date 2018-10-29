@@ -37,6 +37,14 @@ def replaceAll(text, dic):
         text = text.replace(i, j)
     return text
 
+def createArray(dict_values):
+    arr1 = []
+    arr2 = []
+    arr = [arr1, arr2]
+    for key,val in dict_values.iteritems():
+        arr1.append(int(key))
+        arr2.append(val)
+    return arr
 
 def sendData(row, url):
     headers = {'Content-Type': 'application/json'}
@@ -51,21 +59,25 @@ def main():
     info = config.sections['GENERAL']
     filename = basepath + '/' + info['file']
     api_endpoint = info['url_api_test']
-    # nrows = int(info['nrows'])
-    read_rows = int(info['readrows'])
+    chunkrows = int(info['chunkrows'])
     start = int(info['start'])
-    stop = int(info['stop'])
+    rows_to_read = info['rows_to_read']
+    try:
+        rows_to_read = int(rows_to_read)
+    except:
+        rows_to_read = None
+
     date = dtime.date(dtime.today())
     time = dtime.now()
     hasErrors = False
 
-    column_indexes = [0, 1, 2, 4, 5, 7, 8, 9, 10, 12, 13, 14]
-    
-    column_names = ['link', 'title','cover', 'publisher', 'description', 'authors', 'isbn',
-                    'price', 'language', 'advertiser', 'genres', 'category']
+    columns = config.sections['COLUMNS']
+    arr_columns = createArray(columns)
+    column_indexes = arr_columns[0]
+    column_names = arr_columns[1]
 
-    df = pd.read_csv( filename, delimiter=";",  usecols=column_indexes,names=column_names, skiprows=start, nrows=stop,
-                     dtype = {"isbn" : "str"}, quotechar = '"',encoding = "utf-8", chunksize=read_rows)
+    df = pd.read_csv( filename, delimiter=";",  usecols=column_indexes,names=column_names, skiprows=start, 
+                nrows=rows_to_read, dtype = {"isbn" : "str"}, quotechar = '"',encoding = "utf-8", chunksize=chunkrows)
 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
 
@@ -74,8 +86,8 @@ def main():
         dict_genres = {'(Vuoto)' : '', 'sport' : 'sports'}
         chunk['genres'] = replaceAll(chunk['genres'], dict_genres)
 
-        chunk['category'] = replaceOne(chunk['category'], '(Vuoto)', '')
-        chunk['price'] = replaceOne(chunk['price'], ',', '.')
+        chunk['category'] = chunk['category'].replace('(Vuoto)', '')
+        # chunk['price'] = chunk['price'].replace( ',', '.')
 
         nbooks = chunk.to_json(orient='records')
         nbooks = json.loads(nbooks)
@@ -86,7 +98,7 @@ def main():
             
             row_nr = (i + 1 + start)
             detail = nbooks[i]
-            # detail['price'] = float(str(detail['price']).replace(",", "."))
+            detail['price'] = float(detail['price']).replace(",", ".")
             
             res = sendData(detail, api_endpoint)
             code = res.status_code
