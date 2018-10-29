@@ -1,3 +1,7 @@
 
 *.cfg
 *.csv
+*.txt
+*.xlsx
+*.log
+history_errors/*
