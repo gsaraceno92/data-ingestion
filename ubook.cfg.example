@@ -2,9 +2,25 @@
 url_api = xxx
 url_api_test = xxx
 file = xxx
-nrows = 
-readrows = 
+chunkrows = 
 start = 1
+# Don't set value of parameter above if you want to read all file
+rows_to_read = 1 
+# Specify delimiter to use into double quote
+delimiter = ";"
+encoding = "utf-8"
 
-
-
+#key column correspond to position of the column into the file
+[COLUMNS]
+0 = link
+1 = title
+2 = cover
+4 = publisher
+5 = description
+7 = authors
+8 = isbn
+9 = price
+10 = language
+12 = advertiser
+13 = genres
+14 = category
