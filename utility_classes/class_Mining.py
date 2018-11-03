@@ -11,7 +11,7 @@ class FileInfo(object):
         self.merge = merge
 
     def getName(self):
-        return self.name_file
+        return str(self.name_file)
 
     def getDF(self):
         return self.df
@@ -27,11 +27,6 @@ class FileInfo(object):
             return True
         else:
             return False
-
-
-    def replaceOne(self, column, strout, strin):
-        column = self.df[column].replace(strout, strin)
-        return column
 
     def replaceAll(self, ele, dic):
         ele = self.df[ele]

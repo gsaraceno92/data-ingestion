@@ -39,7 +39,7 @@ def replaceAll(text, dic):
 
 def main():
     info = config.sections['INGESTION']
-    filename = basepath + '/' + info['file']
+    filepath = basepath + '/files/' + info['file']
     delimiter = info['delimiter'].replace('"', '')
     encoding = info['encoding']
     api_endpoint = info['url_api_test']
@@ -67,7 +67,7 @@ def main():
     column_names = arr_columns[1]
 
     # Read file csv
-    df = pd.read_csv( filename, delimiter = delimiter , usecols = column_indexes, 
+    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_indexes, 
                     names = column_names, skiprows=start, nrows = rows_to_read, dtype = {"isbn" : "str"},
                     quotechar = '"', encoding = encoding, chunksize = chunkrows, engine=engine)
 
@@ -77,13 +77,7 @@ def main():
     logger.doLog( 'Inizio invio file')
 
     for chunk in df:
-
-        dict_repl = {'(Vuoto)' : '', 'nan' : '', 'sport' : 'sports'}
-        chunk['genres'] = replaceAll(chunk['genres'], dict_repl)
-        chunk['category'] = replaceAll(chunk['category'], dict_repl)
-
-        chunk['price'] = chunk['price'].replace( ',', '.')
-
+        
         nbooks = chunk.to_json(orient='records')
         nbooks = json.loads(nbooks)
         
