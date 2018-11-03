@@ -1,14 +1,32 @@
 [GENERAL]
-url_api = xxx
-url_api_test = xxx
-file = xxx
-chunkrows = 
+file = xxx.csv
+# Specify delimiter to use into double quote
+delimiter = ";"
+encoding = utf-8
+engine = c
+# Don't set value if you don't want to merge the file
+flag_merge = 1
+# Don't set value if you don't want to modify values in file
+flag_modify = 
+
+[MERGEFILE]
+file = xxx.csv
+delimiter = ";"
+encoding = utf-8
+engine = c
+
+[INGESTION]
+url_api = https://ubook.store/ibs/book
+url_api_test = http://ubook.local/ibs/book
+file = xxx.csv
+chunkrows = 10000
 start = 1
 # Don't set value of parameter above if you want to read all file
 rows_to_read = 1 
-# Specify delimiter to use into double quote
+# Specify (into double quote) delimiter to use 
 delimiter = ";"
-encoding = "utf-8"
+encoding = utf-8
+engine = c
 
 #key column correspond to position of the column into the file
 [COLUMNS]

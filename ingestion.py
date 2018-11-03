@@ -5,7 +5,6 @@ import sys, os, inspect
 sys.path.append('../../python/python_common_libs')
 sys.path.append('utility_classes')
 import pandas as pd
-from utils import *
 import requests
 import json
 from time import sleep
@@ -23,6 +22,9 @@ if cmd_subfolder not in sys.path:
 from class_logger import objLogger as Logger
 from class_config import objConfig as Config
 from class_actionFile import dataRequests as req
+from class_Mining import FileInfo
+from class_Mining import createArray 
+
 
 
 def replaceOne(column, strout, strin):
@@ -34,37 +36,17 @@ def replaceAll(text, dic):
         text = text.replace(i, j)
     return text
 
-def createArray(dict_values):
-    d = {int(k):v for k,v in dict_values.items()}
-    od = coll.OrderedDict(sorted(d.items()))
-    arr1 = []
-    arr2 = []
-    arr = [arr1, arr2]
-    for key,val in od.iteritems():
-        arr1.append(int(key))
-        arr2.append(val)
-    return arr
-
-# def sendData(row, url):
-#     headers = {'Content-Type': 'application/json'}
-#     row = json.dumps(row)
-#     # logger.doLog(str(row))
-#     result = ''
-#     result = requests.post(url, data=row, headers=headers)
-#     # sleep(0.01)  
-#     return result
-
-
 
 def main():
-    info = config.sections['GENERAL']
+    info = config.sections['INGESTION']
     filename = basepath + '/' + info['file']
     delimiter = info['delimiter'].replace('"', '')
     encoding = info['encoding']
     api_endpoint = info['url_api_test']
     chunkrows = int(info['chunkrows'])
     rows_to_read = info['rows_to_read']
-
+    engine = info['engine']
+    
     try:
         rows_to_read = int(rows_to_read)
     except:
@@ -87,7 +69,7 @@ def main():
     # Read file csv
     df = pd.read_csv( filename, delimiter = delimiter , usecols = column_indexes, 
                     names = column_names, skiprows=start, nrows = rows_to_read, dtype = {"isbn" : "str"},
-                    quotechar = '"', encoding = encoding, chunksize = chunkrows, engine='python')
+                    quotechar = '"', encoding = encoding, chunksize = chunkrows, engine=engine)
 
     # building errors file with headers 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
@@ -111,8 +93,8 @@ def main():
             
             row_nr = (i + 1 + start)
             detail = nbooks[i]
-
-            res = sendData.postRequest(detail, api_endpoint)
+            data = req(detail, api_endpoint)
+            res = data.postRequest()
             code = res.status_code
             response = res.text 
             if code != 200:
@@ -136,6 +118,5 @@ if __name__ == '__main__':
     basepath = os.path.dirname(os.path.realpath(__file__))
     logger = Logger(basepath + '/ingestion.log')
     config = Config(basepath + '/ubook.cfg')
-    sendData = req()
     main()
 
