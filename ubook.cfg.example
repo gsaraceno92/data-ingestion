@@ -11,6 +11,7 @@ flag_modify =
 
 [MERGEFILE]
 file = xxx.csv
+on = isbn
 delimiter = ";"
 encoding = utf-8
 engine = c
@@ -22,14 +23,13 @@ file = xxx.csv
 chunkrows = 10000
 start = 1
 # Don't set value of parameter above if you want to read all file
-rows_to_read = 1 
+rows_to_read = 5 
 # Specify (into double quote) delimiter to use 
-delimiter = ";"
+delimiter = ","
 encoding = utf-8
 engine = c
 
-#key column correspond to position of the column into the file
-[COLUMNS]
+[COLUMNSGENERAL]
 0 = link
 1 = title
 2 = cover
@@ -42,3 +42,29 @@ engine = c
 12 = advertiser
 13 = genres
 14 = category
+
+#key column correspond to position of the column into the file
+[COLUMNSINGESTION]
+0 = link
+1 = title
+2 = cover
+3 = publisher
+4 = description
+5 = authors
+6 = isbn
+7 = price
+8 = language
+9 = advertiser
+10 = genres
+11 = category
+
+[MODIFIERSVALUES]
+nan =
+sport = sports
+(Vuoto) =
+
+[MODIFIERSNAMES]
+genres = genre
+
+[DROPCOLUMNS]
+

@@ -31,15 +31,13 @@ def main():
     engine = info2['engine']
     on_column = info2['on']
 
-    columns = config.sections['COLUMNS']
+    columns = config.sections['COLUMNSGENERAL']
     arr_columns = createArray(columns)
-    column_indexes = arr_columns[0]
     column_names = arr_columns[1]
 
     # Read file csv
-    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_indexes, 
-                    names = column_names, dtype = str,
-                    quotechar = '"', encoding = encoding, engine=engine)
+    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_names, 
+                     dtype = str, quotechar = '"', encoding = encoding, engine=engine)
     b1 = FileInfo(filename, df)
     logger.doLog('Read first file ' + b1.getName())
 
@@ -51,6 +49,7 @@ def main():
                           dtype = {'isbn' : str}, quotechar = '"', encoding = encoding2, engine=engine)
         b2 = FileInfo(filename2, df2)
         logger.doLog('Read second file ' + b2.getName())
+        "Return rows in left df which are not present in second df"
         merged_books = b1.anti_join(b2.df)
         logger.doLog('Files ' + b1.getName() + ' and ' + b2.getName() + ' merged')
     else:
@@ -59,11 +58,18 @@ def main():
     m = FileInfo('final', merged_books)
 
     if b1.hasToModify():
-        dict1_repl = {'(Vuoto)' : '', 'nan' : '', 'sport' : 'sports'}
-        merged_books['genres'] = m.replaceAll('genres', dict1_repl)
-        merged_books['category'] = m.replaceAll('category', dict1_repl)
+        modnames = config.sections['MODIFIERSNAMES']
+        m.df = m.df.rename(columns = modnames)
+        modval = config.sections['MODIFIERSVALUES']
+        merged_books['genre'] = m.replaceValues('genre', modval)
+        merged_books['category'] = m.replaceValues('category', modval)
         merged_books['price'] = [val.replace(',', '.') for val in merged_books['price']]
-        logger.doLog('File ' + m.getName() + ' modified')
+        if config.sections['DROPCOLUMNS']:
+            drop_arr = createArray(config.sections['DROPCOLUMNS'])
+            m.df = m.df.drop(columns = drop_arr[1])
+            logger.doLog('Dropped columns')
+
+        logger.doLog('File modified')
 
     final_books = merged_books
 

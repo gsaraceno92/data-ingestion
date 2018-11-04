@@ -26,17 +26,6 @@ from class_Mining import FileInfo
 from class_Mining import createArray 
 
 
-
-def replaceOne(column, strout, strin):
-    column = column.replace(strout, strin)
-    return column
-
-def replaceAll(text, dic):
-    for i, j in dic.iteritems():
-        text = text.replace(i, j)
-    return text
-
-
 def main():
     info = config.sections['INGESTION']
     filepath = basepath + '/files/' + info['file']
@@ -61,15 +50,15 @@ def main():
     time = dtime.now()
     hasErrors = False
 
-    columns = config.sections['COLUMNS']
+    columns = config.sections['COLUMNSINGESTION']
     arr_columns = createArray(columns)
     column_indexes = arr_columns[0]
     column_names = arr_columns[1]
 
     # Read file csv
-    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_indexes, 
-                    names = column_names, skiprows=start, nrows = rows_to_read, dtype = {"isbn" : "str"},
-                    quotechar = '"', encoding = encoding, chunksize = chunkrows, engine=engine)
+    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_indexes,
+                     names = column_names, skiprows=start, nrows = rows_to_read, dtype = str,
+                     quotechar = '"', encoding = encoding, chunksize = chunkrows, engine=engine)
 
     # building errors file with headers 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
@@ -85,7 +74,7 @@ def main():
 
         for i in range(detlist):
             
-            row_nr = (i + 1 + start)
+            row_nr = (i + 1 + (start if start is not None else 0))
             detail = nbooks[i]
             data = req(detail, api_endpoint)
             res = data.postRequest()

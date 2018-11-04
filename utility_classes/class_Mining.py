@@ -28,7 +28,7 @@ class FileInfo(object):
         else:
             return False
 
-    def replaceAll(self, ele, dic):
+    def replaceValues(self, ele, dic):
         ele = self.df[ele]
         for i, j in dic.iteritems():
             ele = ele.replace(i, j)
