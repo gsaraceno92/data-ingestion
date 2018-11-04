@@ -17,8 +17,8 @@ encoding = utf-8
 engine = c
 
 [INGESTION]
-url_api = https://ubook.store/ibs/book
-url_api_test = http://ubook.local/ibs/book
+url_api = 
+url_api_test = 
 file = xxx.csv
 chunkrows = 10000
 start = 1
