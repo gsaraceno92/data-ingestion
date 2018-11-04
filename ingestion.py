@@ -5,7 +5,6 @@ import sys, os, inspect
 sys.path.append('../../python/python_common_libs')
 sys.path.append('utility_classes')
 import pandas as pd
-from utils import *
 import requests
 import json
 from time import sleep
@@ -23,48 +22,20 @@ if cmd_subfolder not in sys.path:
 from class_logger import objLogger as Logger
 from class_config import objConfig as Config
 from class_actionFile import dataRequests as req
-
-
-def replaceOne(column, strout, strin):
-    column = column.replace(strout, strin)
-    return column
-
-def replaceAll(text, dic):
-    for i, j in dic.iteritems():
-        text = text.replace(i, j)
-    return text
-
-def createArray(dict_values):
-    d = {int(k):v for k,v in dict_values.items()}
-    od = coll.OrderedDict(sorted(d.items()))
-    arr1 = []
-    arr2 = []
-    arr = [arr1, arr2]
-    for key,val in od.iteritems():
-        arr1.append(int(key))
-        arr2.append(val)
-    return arr
-
-# def sendData(row, url):
-#     headers = {'Content-Type': 'application/json'}
-#     row = json.dumps(row)
-#     # logger.doLog(str(row))
-#     result = ''
-#     result = requests.post(url, data=row, headers=headers)
-#     # sleep(0.01)  
-#     return result
-
+from class_Mining import FileInfo
+from class_Mining import createArray 
 
 
 def main():
-    info = config.sections['GENERAL']
-    filename = basepath + '/' + info['file']
+    info = config.sections['INGESTION']
+    filepath = basepath + '/files/' + info['file']
     delimiter = info['delimiter'].replace('"', '')
     encoding = info['encoding']
     api_endpoint = info['url_api_test']
     chunkrows = int(info['chunkrows'])
     rows_to_read = info['rows_to_read']
-
+    engine = info['engine']
+    
     try:
         rows_to_read = int(rows_to_read)
     except:
@@ -79,15 +50,15 @@ def main():
     time = dtime.now()
     hasErrors = False
 
-    columns = config.sections['COLUMNS']
+    columns = config.sections['COLUMNSINGESTION']
     arr_columns = createArray(columns)
     column_indexes = arr_columns[0]
     column_names = arr_columns[1]
 
     # Read file csv
-    df = pd.read_csv( filename, delimiter = delimiter , usecols = column_indexes, 
-                    names = column_names, skiprows=start, nrows = rows_to_read, dtype = {"isbn" : "str"},
-                    quotechar = '"', encoding = encoding, chunksize = chunkrows, engine='python')
+    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_indexes,
+                     names = column_names, skiprows=start, nrows = rows_to_read, dtype = str,
+                     quotechar = '"', encoding = encoding, chunksize = chunkrows, engine=engine)
 
     # building errors file with headers 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
@@ -95,13 +66,7 @@ def main():
     logger.doLog( 'Inizio invio file')
 
     for chunk in df:
-
-        dict_repl = {'(Vuoto)' : '', 'nan' : '', 'sport' : 'sports'}
-        chunk['genres'] = replaceAll(chunk['genres'], dict_repl)
-        chunk['category'] = replaceAll(chunk['category'], dict_repl)
-
-        chunk['price'] = chunk['price'].replace( ',', '.')
-
+        
         nbooks = chunk.to_json(orient='records')
         nbooks = json.loads(nbooks)
         
@@ -109,10 +74,10 @@ def main():
 
         for i in range(detlist):
             
-            row_nr = (i + 1 + start)
+            row_nr = (i + 1 + (start if start is not None else 0))
             detail = nbooks[i]
-
-            res = sendData.postRequest(detail, api_endpoint)
+            data = req(detail, api_endpoint)
+            res = data.postRequest()
             code = res.status_code
             response = res.text 
             if code != 200:
@@ -136,6 +101,5 @@ if __name__ == '__main__':
     basepath = os.path.dirname(os.path.realpath(__file__))
     logger = Logger(basepath + '/ingestion.log')
     config = Config(basepath + '/ubook.cfg')
-    sendData = req()
     main()
 
