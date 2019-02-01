@@ -30,11 +30,11 @@ You can use the pip command:
 ### Steps
 1. Git clone the repository into your folder.
         
-        git clone https://your_username@github/data-ingestion.git
+        git clone https://github.com/your_username/data-ingestion.git
 
 2. Copy project.cfg.example to project.cfg
 
-3. Launch the summury.py file to get basic statistics about the dataset or some particolar columns.
+3. Launch the summury.py file to get basic statistics about the dataset or some particolar columns. Set in project.cfg file the columns you want to analyze using **STATISTICSCOLS** section.
 It will generate a .csv file in the folder `statistics`. 
     
         python summury.py
@@ -42,12 +42,14 @@ It will generate a .csv file in the folder `statistics`.
 
 
 4. Launch the mining.py file to go do data mining and correct the dataset changing column names, modifying values or dropping columns.
+Set in project.cfg file (in **GENERAL** section) the flag to decide if it's necessary any edits in the dataset, then setthe columns you want to modify (**MODIFIERSCOLS** section), the values to change (**MODIFIERSVALUES** section) and the column(s) to drop.
 It will generate a .csv file in the folder `files` with a name that has to be set in the project.cfg file; it will produce also some logs file to trace every step. 
     
         python mining.py
 
 
 5. Launch the ingestion.py file to finally send the data into your file to a endpoint (maybe a your application in which you want to increment the data).
+Set in project.cfg file every parameter (in **INGESTION** section) that is necessary to send the data.
 This step will generate a **errors.csv** file in the folder `history_errors` with a name that is incremental and composed by date_hour_minute to keep every file of error and reuse this file. It will produce also some logs file to trace every step.  
     
         python ingestion.py
