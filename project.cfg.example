@@ -58,13 +58,26 @@ engine = c
 10 = genres
 11 = category
 
+#set the columns you want to modify
+[MODIFIERSCOLS]
+col1 = 
+col2 = 
+col3 = 
+
+#set original value and the new value to substitute
 [MODIFIERSVALUES]
 nan =
-sport = sports
+example = test
 (Vuoto) =
 
+#set original column name and the new column name
 [MODIFIERSNAMES]
 genres = genre
 
+#specify column to delete
 [DROPCOLUMNS]
+0 = link
 
+[STATISTICSCOLS]
+col1 = 
+col2 = 

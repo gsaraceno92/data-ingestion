@@ -6,7 +6,7 @@ class dataRequests(object):
 
     __slots__ = ["data", "url"]
 
-    def __init__(self, data,url= "http://ubook.local/ibs/book"):
+    def __init__(self, data,url= "http://project.local/ibs/book"):
         self.data = data
         self.url = url
 

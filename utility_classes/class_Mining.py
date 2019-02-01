@@ -30,7 +30,7 @@ class FileInfo(object):
 
     def replaceValues(self, ele, dic):
         ele = self.df[ele]
-        for i, j in dic.iteritems():
+        for i, j in dic.items(): # .iteritems() Python 2.*
             ele = ele.replace(i, j)
         return ele
 
@@ -52,9 +52,8 @@ def createArray(dict_values):
     arr1 = []
     arr2 = []
     arr = [arr1, arr2]
-    for key,val in od.iteritems():
+    for key,val in od.items(): # .iteritems() Python 2.*
         arr1.append(int(key))
         arr2.append(val)
     return arr
-
-    
+   

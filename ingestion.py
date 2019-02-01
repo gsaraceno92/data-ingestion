@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import sys, os, inspect
-sys.path.append('../../python/python_common_libs')
 sys.path.append('utility_classes')
 import pandas as pd
 import requests
 import json
 from time import sleep
-# import reload
 from datetime import datetime as dtime
 import datetime 
 import shutil
 import collections as coll 
+from importlib import reload #used only in Python 3.*
 
 # Use this if you want to include modules from a subfolder
 cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../common")))
@@ -67,15 +66,15 @@ def main():
 
     for chunk in df:
         
-        nbooks = chunk.to_json(orient='records')
-        nbooks = json.loads(nbooks)
+        records = chunk.to_json(orient='records')
+        records = json.loads(records)
         
         detlist = len(chunk.index)
 
         for i in range(detlist):
             
             row_nr = (i + 1 + (start if start is not None else 0))
-            detail = nbooks[i]
+            detail = records[i]
             data = req(detail, api_endpoint)
             res = data.postRequest()
             code = res.status_code
@@ -96,10 +95,13 @@ def main():
 
 if __name__ == '__main__':
     reload(sys)
-    sys.setdefaultencoding('utf8')
+
+    #Uncomment the line above if you use Python 2.* 
+    # sys.setdefaultencoding('utf8')
+
     #determining path of execution
     basepath = os.path.dirname(os.path.realpath(__file__))
     logger = Logger(basepath + '/ingestion.log')
-    config = Config(basepath + '/ubook.cfg')
+    config = Config(basepath + '/project.cfg')
     main()
 
