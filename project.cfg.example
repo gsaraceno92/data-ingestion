@@ -1,4 +1,5 @@
 [GENERAL]
+type = excel #excel or others 
 file = xxx.csv
 # Specify delimiter to use into double quote
 delimiter = ";"
@@ -8,6 +9,20 @@ engine = c
 flag_merge = 1
 # Don't set value if you don't want to modify values in file
 flag_modify = 
+
+[COLUMNSGENERAL]
+0 = link
+1 = title
+2 = cover
+4 = publisher
+5 = description
+7 = authors
+8 = isbn
+9 = price
+10 = language
+12 = advertiser
+13 = genres
+14 = category
 
 [MERGEFILE]
 file = xxx.csv
@@ -28,20 +43,6 @@ rows_to_read = 5
 delimiter = ","
 encoding = utf-8
 engine = c
-
-[COLUMNSGENERAL]
-0 = link
-1 = title
-2 = cover
-4 = publisher
-5 = description
-7 = authors
-8 = isbn
-9 = price
-10 = language
-12 = advertiser
-13 = genres
-14 = category
 
 #key column correspond to position of the column into the file
 [COLUMNSINGESTION]
@@ -81,3 +82,6 @@ genres = genre
 [STATISTICSCOLS]
 col1 = 
 col2 = 
+
+[SUMMARY]
+results_file = xxx.csv
