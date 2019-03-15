@@ -16,7 +16,7 @@ reload(sys)
 
 #determining path of execution
 basepath = os.path.dirname(os.path.realpath(__file__))
-config = Config(basepath + '/ubook.cfg')
+config = Config(basepath + '/project.cfg')
 info = config.sections['GENERAL']
 stat = config.sections['SUMMARY']
 
