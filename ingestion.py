@@ -62,7 +62,6 @@ def main():
 
     # building errors file with headers 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
-
     logger.doLog( 'Inizio invio file')
 
     for chunk in df:

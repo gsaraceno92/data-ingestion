@@ -23,9 +23,11 @@ I used Python 3.6 to launch the commands in the project so if you prefer (or you
   * json
   * time
   * datetime
+  * xlrd
 
 You can use the pip command: 
-    `python -m pip install library-name`;
+    - Windwos: `python -m pip install library-name`;
+    - Linux: `pip install library-name`;
 
 ### Steps
 1. Git clone the repository into your folder.
@@ -34,16 +36,18 @@ You can use the pip command:
 
 2. Copy project.cfg.example to project.cfg
 
+        Use GENERAL section to setup the file info to use in step 3 and 4.
+
 3. Launch the summury.py file to get basic statistics about the dataset or some particolar columns. Set in project.cfg file the columns you want to analyze using **STATISTICSCOLS** section.
-It will generate a .csv file in the folder `statistics`. 
+It will generate a .csv file in the folder `statistics` with a name established in **SUMMARY** section. 
     
         python summury.py
 
 
 
 4. Launch the mining.py file to go do data mining and correct the dataset changing column names, modifying values or dropping columns.
-Set in project.cfg file (in **GENERAL** section) the flag to decide if it's necessary any edits in the dataset, then setthe columns you want to modify (**MODIFIERSCOLS** section), the values to change (**MODIFIERSVALUES** section) and the column(s) to drop.
-It will generate a .csv file in the folder `files` with a name that has to be set in the project.cfg file; it will produce also some logs file to trace every step. 
+Set in project.cfg file (in **GENERAL** section) the flag to decide if it's necessary any edits in the dataset, then set the columns you want to modify (**MODIFIERSCOLS** section), the values to change (**MODIFIERSVALUES** section),  the columns to merge (**MERGECOLS** section) and the column(s) to drop.
+It will generate a .csv file in the folder `files` with the name `data.csv`; it will produce also some logs file to trace every step. 
     
         python mining.py
 
