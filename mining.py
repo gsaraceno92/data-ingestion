@@ -74,7 +74,8 @@ def main():
         for col in modcols:
             column = modcols[col]
             m.df[column] = m.replaceValues(column, modval)
-        m.df = m.mergeCols(mergecols)       
+        if mergecols:
+            m.df = m.mergeCols(mergecols)
         if config.sections['DROPCOLUMNS']:
             drop_arr = createArray(config.sections['DROPCOLUMNS'])
             m.df = m.df.drop(drop_arr[1], axis=1)
