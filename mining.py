@@ -19,6 +19,10 @@ def main():
     engine = info['engine']
     merge = bool(info['flag_merge'])
     modify = bool(info['flag_modify'])
+    try:
+        sheet = int(info['sheet'])
+    except:
+        sheet = info['sheet']   
 
     if not merge and not modify:
         logger.doLog('No action requested')
@@ -38,7 +42,7 @@ def main():
 
     # Read file
     if type_file == 'excel':
-        df = pd.read_excel(filepath, usecols=column_names)
+        df = pd.read_excel(filepath, usecols=column_names, sheetname=sheet)
     else:
         df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_names, 
                         dtype = str, quotechar = '"', encoding = encoding, engine=engine)

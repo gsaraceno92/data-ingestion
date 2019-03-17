@@ -1,6 +1,7 @@
 [GENERAL]
 #set type excel else others 
 type = excel 
+sheet = 0
 file = xxx.csv
 # Specify delimiter to use into double quote
 delimiter = ";"
