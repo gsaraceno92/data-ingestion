@@ -12,12 +12,17 @@ from class_Mining import createArray
 def main():
     info = config.sections['GENERAL']
     filename = info['file']
-    filepath = basepath + '/files/' + info['file']
+    type_file = info['type']
+    filepath = basepath + '/files/' + filename
     delimiter = info['delimiter'].replace('"', '')
     encoding = info['encoding']
     engine = info['engine']
     merge = bool(info['flag_merge'])
     modify = bool(info['flag_modify'])
+    try:
+        sheet = int(info['sheet'])
+    except:
+        sheet = info['sheet']   
 
     if not merge and not modify:
         logger.doLog('No action requested')
@@ -35,45 +40,53 @@ def main():
     arr_columns = createArray(columns)
     column_names = arr_columns[1]
 
-    # Read file csv
-    df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_names, 
-                     dtype = str, quotechar = '"', encoding = encoding, engine=engine)
+    # Read file
+    if type_file == 'excel':
+        df = pd.read_excel(filepath, usecols=column_names, sheetname=sheet)
+    else:
+        df = pd.read_csv( filepath, delimiter = delimiter , usecols = column_names, 
+                        dtype = str, quotechar = '"', encoding = encoding, engine=engine)
     file_info = FileInfo(filename, df)
     logger.doLog('Read first file ' + file_info.getName())
 
     file_info.merge = merge
     file_info.modify = modify
-
+    data_df = pd.DataFrame
     if file_info.hasToMerge():
         df2 = pd.read_csv(filepath2, delimiter = delimiter2 , usecols = [on_column], 
                           dtype = {'isbn' : str}, quotechar = '"', encoding = encoding2, engine=engine)
         data_info = FileInfo(filename2, df2)
         logger.doLog('Read second file ' + data_info.getName())
         "Return rows in left df which are not present in second df"
-        data_merged = file_info.anti_join(data_info.df)
+        data_df = file_info.anti_join(data_info.df)
         logger.doLog('Files ' + file_info.getName() + ' and ' + data_info.getName() + ' merged')
     else:
-        data_merged = file_info.df
+        data_df = file_info.df
 
-    m = FileInfo('final', data_merged)
+    m = FileInfo('final', data_df)
 
     if file_info.hasToModify():
         modnames = config.sections['MODIFIERSNAMES']
-        m.df = m.df.rename(columns = modnames)
+        modnames = {k.replace('"', ''): v for k, v in modnames.items()} 
         modval = config.sections['MODIFIERSVALUES']
         modcols = config.sections['MODIFIERSCOLS']
+        mergecols = config.sections['MERGECOLS']
+        m.df.columns = [col.lower() for col in m.df.columns]
+        m.df = m.df.rename(columns = modnames)
+        m.df = m.df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+        m.df = m.df.apply(lambda x: x.fillna(''))
         for col in modcols:
-            columns = modcols[col]
-            data_merged[columns] = m.replaceValues(columns, modval)
-        
+            column = modcols[col]
+            m.df[column] = m.replaceValues(column, modval)
+        if mergecols:
+            m.df = m.mergeCols(mergecols)
         if config.sections['DROPCOLUMNS']:
             drop_arr = createArray(config.sections['DROPCOLUMNS'])
-            m.df = m.df.drop(columns = drop_arr[1])
+            m.df = m.df.drop(drop_arr[1], axis=1)
             logger.doLog('Dropped columns')
-
+        
         logger.doLog('File modified')
-
-    final_data = data_merged
+    final_data = m.df
 
     data = FileInfo('files/data.csv', final_data)
     data.df.to_csv(data.name_file, quotechar='"', encoding='utf-8', index=False)

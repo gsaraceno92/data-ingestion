@@ -34,6 +34,19 @@ class FileInfo(object):
             ele = ele.replace(i, j)
         return ele
 
+    def mergeCols(self, dic):
+        for k, v in dic.items(): # .iteritems() Python 2.*
+            values = v.split('+')
+            values = [val.strip() for val in values]
+            self.df[k] = ''
+            i = 0
+            for val in values:
+                self.df[k] += self.df[val].astype(str)
+                if i < len(values) - 1:
+                    self.df[k] += ', '
+                i += 1
+        return self.df
+
     "Return rows in x which are not present in y"
     def anti_join(self, y, on = "isbn"):
         x = self.df

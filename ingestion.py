@@ -31,6 +31,7 @@ def main():
     delimiter = info['delimiter'].replace('"', '')
     encoding = info['encoding']
     api_endpoint = info['url_api_test']
+    statusCode = int(info['status_code'])
     chunkrows = int(info['chunkrows'])
     rows_to_read = info['rows_to_read']
     engine = info['engine']
@@ -61,7 +62,6 @@ def main():
 
     # building errors file with headers 
     pd.DataFrame(columns=column_names).to_csv('errors.csv', quotechar='"', encoding='utf-8', index=False)
-
     logger.doLog( 'Inizio invio file')
 
     for chunk in df:
@@ -79,7 +79,7 @@ def main():
             res = data.postRequest()
             code = res.status_code
             response = res.text 
-            if code != 200:
+            if code != statusCode:
                 hasErrors = True
                 logger.doLog( 'ERRORE inserimento riga numero: ' + str(row_nr) + ' ' + response)
                 chunk.iloc[[i]].to_csv('errors.csv', mode='a',quotechar='"', encoding='utf-8', index=False, header=False)

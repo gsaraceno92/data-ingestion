@@ -1,5 +1,7 @@
 [GENERAL]
-type = excel #excel or others 
+#set type excel else others 
+type = excel 
+sheet = 0
 file = xxx.csv
 # Specify delimiter to use into double quote
 delimiter = ";"
@@ -24,6 +26,13 @@ flag_modify =
 13 = genres
 14 = category
 
+[STATISTICSCOLS]
+col1 = 
+col2 = 
+
+[SUMMARY]
+results_file = xxx.csv
+
 [MERGEFILE]
 file = xxx.csv
 on = isbn
@@ -31,10 +40,35 @@ delimiter = ";"
 encoding = utf-8
 engine = c
 
+#set original column name and the new column name
+[MODIFIERSNAMES]
+genres = genre
+
+#set the columns you want to modify
+[MODIFIERSCOLS]
+col1 = 
+col2 = 
+col3 = 
+
+#set original value and the new value to substitute
+[MODIFIERSVALUES]
+nan =
+example = test
+(Vuoto) =
+
+# key is new name and use sum to set cols to merge
+[MERGECOLS]
+new_column = column1 + column2
+
+#specify column to delete
+[DROPCOLUMNS]
+0 = link
+
 [INGESTION]
 url_api = 
 url_api_test = 
-file = xxx.csv
+status_code = 201
+file = data.csv
 chunkrows = 10000
 start = 1
 # Don't set value of parameter above if you want to read all file
@@ -58,30 +92,3 @@ engine = c
 9 = advertiser
 10 = genres
 11 = category
-
-#set the columns you want to modify
-[MODIFIERSCOLS]
-col1 = 
-col2 = 
-col3 = 
-
-#set original value and the new value to substitute
-[MODIFIERSVALUES]
-nan =
-example = test
-(Vuoto) =
-
-#set original column name and the new column name
-[MODIFIERSNAMES]
-genres = genre
-
-#specify column to delete
-[DROPCOLUMNS]
-0 = link
-
-[STATISTICSCOLS]
-col1 = 
-col2 = 
-
-[SUMMARY]
-results_file = xxx.csv
