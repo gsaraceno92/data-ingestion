@@ -6,3 +6,4 @@
 *.log
 *.pyc
 history_errors/*
+!requirements.txt
