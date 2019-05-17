@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/gsaraceno92/data-ingestion.svg?branch=master)](https://travis-ci.org/gsaraceno92/data-ingestion)
 # Ingestion and data analysis: Python
 
 This project can be used to modify almost all type of structured file and send the data to a endpoint through a post request (tipically a Rest API request).
